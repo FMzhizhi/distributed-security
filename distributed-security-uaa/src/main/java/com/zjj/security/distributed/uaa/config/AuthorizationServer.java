@@ -71,7 +71,7 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     //2.1令牌管理服务
     @Bean
     public AuthorizationServerTokenServices tokenService() {
-        DefaultTokenServices service=new DefaultTokenServices(); //令牌访问服务
+        DefaultTokenServices service=new DefaultTokenServices(); //令牌访问服务    使用 DefaultTokenServices 在资源服务器本地配置令牌存储、解码、解析方式 使用
         service.setClientDetailsService(clientDetailsService);//客户端详情服务
         service.setSupportRefreshToken(true);//支持刷新令牌
         service.setTokenStore(tokenStore);//令牌存储策略
