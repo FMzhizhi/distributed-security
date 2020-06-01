@@ -96,7 +96,7 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
                 .allowedTokenEndpointRequestMethods(HttpMethod.POST); //允许post提交
     }
 
-    //3.1令牌访问断点安全策列
+    //3.1令牌访问端点安全策列
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security){
         security
