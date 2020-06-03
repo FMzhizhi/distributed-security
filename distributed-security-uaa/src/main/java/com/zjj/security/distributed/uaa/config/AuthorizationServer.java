@@ -38,6 +38,9 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     @Autowired
     private TokenStore tokenStore;
 
+    @Autowired   //注入jwt令牌
+    private JwtAccessTokenConverter accessTokenConverter;
+
     @Autowired
     private ClientDetailsService clientDetailsService; //客户端详情服务
 
@@ -50,13 +53,22 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+
+    @Bean  //从数据库配置客户端的资源
+    public ClientDetailsService clientDetailsService(DataSource dataSource) {
+        ClientDetailsService clientDetailsService = new JdbcClientDetailsService(dataSource);
+        ((JdbcClientDetailsService)
+                clientDetailsService).setPasswordEncoder(passwordEncoder);
+        return clientDetailsService;
+    }
+
     //1.客户端详情服务
     @Override
     public void configure(ClientDetailsServiceConfigurer clients)
             throws Exception {
 
-        // clients.withClientDetails(clientDetailsService);
-       clients.inMemory()// 使用内存方式存储
+        clients.withClientDetails(clientDetailsService);
+      /* clients.inMemory()// 使用内存方式存储
                 .withClient("c1")// client_id
                 .secret(new BCryptPasswordEncoder().encode("secret"))//客户端密钥
                 .resourceIds("res1")//资源列表
@@ -65,25 +77,36 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
                 .autoApprove(false)//false跳转到授权页面
                 //加上验证回调地址
                //这个相当于是client的域名,重定向给code的时候会跳转这个域名
-                .redirectUris("http://www.baidu.com");
+                .redirectUris("http://www.baidu.com");*/
     }
 
     //2.1令牌管理服务
     @Bean
     public AuthorizationServerTokenServices tokenService() {
-        DefaultTokenServices service=new DefaultTokenServices(); //令牌访问服务    使用 DefaultTokenServices 在资源服务器本地配置令牌存储、解码、解析方式 使用
+        DefaultTokenServices service = new DefaultTokenServices(); //令牌访问服务    使用 DefaultTokenServices 在资源服务器本地配置令牌存储、解码、解析方式 使用
         service.setClientDetailsService(clientDetailsService);//客户端详情服务
         service.setSupportRefreshToken(true);//支持刷新令牌
         service.setTokenStore(tokenStore);//令牌存储策略
+        //设置令牌增强
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(accessTokenConverter));
+        service.setTokenEnhancer(tokenEnhancerChain);
+
         service.setAccessTokenValiditySeconds(7200); // 令牌默认有效期2小时
         service.setRefreshTokenValiditySeconds(259200); // 刷新令牌默认有效期3天
         return service;
     }
 
-    //设置授权码模式如何存取，使用内存方式
+    /*//设置授权码模式如何存取，使用内存方式
     @Bean
-    public AuthorizationCodeServices authorizationCodeServices(){ //设置授权码模式的授权码
+    public AuthorizationCodeServices authorizationCodeServices() { //设置授权码模式的授权码
         return new InMemoryAuthorizationCodeServices();
+    }*/
+
+    //设置授权码模式如何存取，使用数据库
+    @Bean
+    public AuthorizationCodeServices authorizationCodeServices(DataSource dataSource) {
+        return new JdbcAuthorizationCodeServices(dataSource);//设置授权码模式的授权码如何存取        
     }
 
     //2.2令牌访问端点
@@ -98,10 +121,10 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
 
     //3.1令牌访问端点安全策列
     @Override
-    public void configure(AuthorizationServerSecurityConfigurer security){
+    public void configure(AuthorizationServerSecurityConfigurer security) {
         security
                 .tokenKeyAccess("permitAll()")                    //oauth/token_key 公钥是公开
                 .checkTokenAccess("permitAll()")                  //oauth/check_token公开
-                .allowFormAuthenticationForClients();			//允许表单认证（申请令牌;
+                .allowFormAuthenticationForClients();            //允许表单认证（申请令牌;
     }
 }

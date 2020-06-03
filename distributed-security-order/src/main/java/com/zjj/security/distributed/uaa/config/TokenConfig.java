@@ -1,9 +1,9 @@
 package com.zjj.security.distributed.uaa.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
@@ -16,13 +16,13 @@ public class TokenConfig {
 
     private String SIGNING_KEY = "uaa123";
 
+
    @Bean
     public TokenStore tokenStore() {
         //JWT令牌存储方案  对称
         return new JwtTokenStore(accessTokenConverter());
     }
 
-    //令牌的产生
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
