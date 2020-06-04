@@ -11,6 +11,8 @@
     <modules>
         <module>distributed-security-uaa</module>
         <module>distributed-security-order</module>
+        <module>distributed-security-discovery</module>
+        <module>distributed-security-gateway</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

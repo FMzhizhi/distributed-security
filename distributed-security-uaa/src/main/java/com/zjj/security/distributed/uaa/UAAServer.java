@@ -11,8 +11,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @version 1.0
  **/
 @SpringBootApplication
-//@EnableDiscoveryClient
-//@EnableHystrix
+@EnableDiscoveryClient
+@EnableHystrix
 @EnableFeignClients(basePackages = {"com.zjj.security.distributed.uaa"})
 public class UAAServer {
     public static void main(String[] args) {
